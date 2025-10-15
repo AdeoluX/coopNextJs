@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
@@ -10,6 +12,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Lemon palette */
+  --color-lemon-50: #fcffe7;
+  --color-lemon-100: #f6ffc2;
+  --color-lemon-200: #eeff8a;
+  --color-lemon-300: #e0ff4f;
+  --color-lemon-400: #d2ff26;
+  --color-lemon-500: #c4fa12; /* primary */
+  --color-lemon-600: #a6db0b;
+  --color-lemon-700: #86b70a;
+  --color-lemon-800: #6a910f;
+  --color-lemon-900: #577312;
 }
 
 @media (prefers-color-scheme: dark) {
