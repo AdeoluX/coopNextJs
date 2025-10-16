@@ -70,8 +70,8 @@ export default function BulkUploadModal({
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -167,7 +167,7 @@ export default function BulkUploadModal({
               <li>• Optional columns: middlename, dob, role</li>
               <li>• Email must be unique and valid</li>
               <li>• Phone must be unique</li>
-              <li>• Role defaults to "user" if not specified</li>
+              <li>• Role defaults to &quot;user&quot; if not specified</li>
             </ul>
           </div>
 

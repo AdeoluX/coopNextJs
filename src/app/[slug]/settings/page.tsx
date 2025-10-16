@@ -15,7 +15,12 @@ export default function SettingsPage({
   const [isClient, setIsClient] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>(null);
   const [loading, setLoading] = useState(false);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<{
+    plan: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+  } | null>(null);
   const [showChangePlanModal, setShowChangePlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("starter");
 
@@ -232,8 +237,8 @@ export default function SettingsPage({
                     No Active Subscription
                   </h3>
                   <p className="text-gray-600 mb-6">
-                    You don't have an active subscription plan. Choose a plan
-                    below to get started.
+                    You don&apos;t have an active subscription plan. Choose a
+                    plan below to get started.
                   </p>
                   <button
                     onClick={() => setShowChangePlanModal(true)}

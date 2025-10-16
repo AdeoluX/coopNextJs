@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import Link from "next/link";
+// import Link from "next/link"; // Unused for now
 import AdminSidebar from "@/components/AdminSidebar";
 import {
   Chart as ChartJS,
@@ -15,7 +15,7 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
-import { Line, Bar, Doughnut } from "react-chartjs-2";
+import { Line, Doughnut } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -41,8 +41,50 @@ export default function ReportsPage({
   const [downloading, setDownloading] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [analytics, setAnalytics] = useState<any>(null);
-  const [cooperativeStats, setCooperativeStats] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<{
+    totalMembers: number;
+    totalAssets: number;
+    totalLoans: number;
+    totalTransactions: number;
+    revenue: number;
+    expenses: number;
+    profit: number;
+    overview?: {
+      totalMembers: number;
+      totalTransactions: number;
+      totalBalance: number;
+      successRate: string;
+    };
+    trends?: {
+      daily: Record<string, { count: number; amount: number }>;
+    };
+    transactions?: {
+      types: Record<string, number>;
+      successful: number;
+      pending: number;
+      failed: number;
+      averageAmount: number;
+    };
+    members?: {
+      active: number;
+      newThisPeriod: number;
+    };
+    wallets?: {
+      total: number;
+      walletsWithBalance: number;
+    };
+    period?: {
+      startDate: string;
+      endDate: string;
+      range: string;
+    };
+  } | null>(null);
+  // const [cooperativeStats, setCooperativeStats] = useState<{
+  //   totalMembers: number;
+  //   totalAssets: number;
+  //   totalLoans: number;
+  //   totalTransactions: number;
+  // } | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -53,7 +95,7 @@ export default function ReportsPage({
   useEffect(() => {
     if (token && isClient) {
       fetchAnalytics();
-      fetchCooperativeStats();
+      // fetchCooperativeStats();
     }
   }, [token, isClient, dateRange]);
 
@@ -78,20 +120,20 @@ export default function ReportsPage({
     }
   };
 
-  const fetchCooperativeStats = async () => {
-    if (!token) return;
-    try {
-      const response = await fetch(`${apiBase}/api/v1/admin/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setCooperativeStats(data.data || data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch cooperative stats:", error);
-    }
-  };
+  // const fetchCooperativeStats = async () => {
+  //   if (!token) return;
+  //   try {
+  //     const response = await fetch(`${apiBase}/api/v1/admin/stats`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setCooperativeStats(data.data || data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to fetch cooperative stats:", error);
+  //   }
+  // };
 
   const apiBase = process.env.NEXT_PUBLIC_API_BASE as string;
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation"; // Unused for now
 import MemberSidebar from "@/components/MemberSidebar";
 
 interface Asset {
@@ -37,7 +37,7 @@ export default function MemberAssetsPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const pathname = usePathname();
+  // const pathname = usePathname(); // Unused for now
   const [assets, setAssets] = useState<PaginatedAssets | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,12 +52,12 @@ export default function MemberAssetsPage({
   const [assetEmail, setAssetEmail] = useState("");
   const [purchasing, setPurchasing] = useState(false);
 
-  const handleSignOut = () => {
-    localStorage.removeItem("vc_access_token");
-    localStorage.removeItem("vc_refresh_token");
-    localStorage.removeItem("vc_org_id");
-    window.location.href = `/${resolvedParams.slug}`;
-  };
+  // const handleSignOut = () => {
+  //   localStorage.removeItem("vc_access_token");
+  //   localStorage.removeItem("vc_refresh_token");
+  //   localStorage.removeItem("vc_org_id");
+  //   window.location.href = `/${resolvedParams.slug}`;
+  // };
 
   useEffect(() => {
     setIsClient(true);
@@ -87,8 +87,8 @@ export default function MemberAssetsPage({
       if (data.data?.email) {
         setAssetEmail(data.data.email);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 
@@ -114,11 +114,14 @@ export default function MemberAssetsPage({
 
       // Handle the response structure: data is an array directly
       if (Array.isArray(data.data)) {
-        setAssets({ data: data.data, pagination: data.pagination || {} });
+        setAssets({
+          data: data.data,
+          pagination: data.pagination || { page: 1, limit: 10 },
+        });
       } else if (Array.isArray(data)) {
-        setAssets({ data: data, pagination: {} });
+        setAssets({ data: data, pagination: { page: 1, limit: 10 } });
       } else {
-        setAssets({ data: [], pagination: {} });
+        setAssets({ data: [], pagination: { page: 1, limit: 10 } });
       }
     } catch (error) {
       setError(
@@ -181,8 +184,8 @@ export default function MemberAssetsPage({
       } else {
         setError("Payment URL not received. Response: " + JSON.stringify(data));
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setPurchasing(false);
     }
@@ -330,27 +333,29 @@ export default function MemberAssetsPage({
         )}
 
         {/* Pagination */}
-        {assets?.pagination && assets.pagination.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-3 mt-8">
-            <button
-              className="px-3 py-2 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-600">
-              Page {page} of {assets.pagination.totalPages}
-            </span>
-            <button
-              className="px-3 py-2 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={page >= (assets.pagination.totalPages || 1)}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Next
-            </button>
-          </div>
-        )}
+        {assets?.pagination &&
+          assets.pagination.totalPages &&
+          assets.pagination.totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 mt-8">
+              <button
+                className="px-3 py-2 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {page} of {assets.pagination.totalPages}
+              </span>
+              <button
+                className="px-3 py-2 rounded border border-gray-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={page >= (assets.pagination.totalPages || 1)}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
       </div>
 
       {/* Asset Purchase Modal */}

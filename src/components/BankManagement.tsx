@@ -70,8 +70,10 @@ export default function BankManagement({
       if (onBankUpdate) {
         onBankUpdate(bankData);
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch bank data");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to fetch bank data"
+      );
     } finally {
       setLoading(false);
     }
@@ -123,8 +125,11 @@ export default function BankManagement({
       setResolvedAccountName(result.accountName);
       setAccountName(result.accountName);
       showToast("Bank account resolved successfully", "success");
-    } catch (err: any) {
-      showToast(err.message || "Failed to resolve bank account", "error");
+    } catch (err: unknown) {
+      showToast(
+        err instanceof Error ? err.message : "Failed to resolve bank account",
+        "error"
+      );
     } finally {
       setResolving(false);
     }
@@ -153,8 +158,11 @@ export default function BankManagement({
       if (onBankUpdate) {
         onBankUpdate(newBank);
       }
-    } catch (err: any) {
-      showToast(err.message || "Failed to add bank account", "error");
+    } catch (err: unknown) {
+      showToast(
+        err instanceof Error ? err.message : "Failed to add bank account",
+        "error"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -183,28 +191,31 @@ export default function BankManagement({
       if (onBankUpdate) {
         onBankUpdate(updatedBank);
       }
-    } catch (err: any) {
-      showToast(err.message || "Failed to update bank account", "error");
+    } catch (err: unknown) {
+      showToast(
+        err instanceof Error ? err.message : "Failed to update bank account",
+        "error"
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const deleteBankAccount = async () => {
-    if (!confirm("Are you sure you want to delete your bank account?")) return;
+  // const deleteBankAccount = async () => {
+  //   if (!confirm("Are you sure you want to delete your bank account?")) return;
 
-    try {
-      await BankService.deleteBankAccount(token);
-      setMyBank(null);
-      showToast("Bank account deleted successfully", "success");
+  //   try {
+  //     await BankService.deleteBankAccount(token);
+  //     setMyBank(null);
+  //     showToast("Bank account deleted successfully", "success");
 
-      if (onBankUpdate) {
-        onBankUpdate(null);
-      }
-    } catch (err: any) {
-      showToast(err.message || "Failed to delete bank account", "error");
-    }
-  };
+  //     if (onBankUpdate) {
+  //       onBankUpdate(null);
+  //     }
+  //   } catch (err: any) {
+  //     showToast(err.message || "Failed to delete bank account", "error");
+  //   }
+  // };
 
   const openAddModal = () => {
     resetForm();
@@ -682,4 +693,3 @@ function ResolveModal({
     </div>
   );
 }
-

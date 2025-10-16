@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import Link from "next/link";
+// import Link from "next/link"; // Unused for now
 import AdminSidebar from "@/components/AdminSidebar";
 
 interface AssetItem {
@@ -44,11 +44,47 @@ export default function AssetsPage({
     y: number;
   } | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editingAsset, setEditingAsset] = useState<any>(null);
+  const [editingAsset, setEditingAsset] = useState<{
+    _id: string;
+    name: string;
+    description: string;
+    pricePerUnit: number;
+    type?: string;
+    status?: string;
+    currency?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    settings?: {
+      pricePerUnit: number;
+      minUnit?: number;
+      minAmount?: number;
+    };
+  } | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [viewingAsset, setViewingAsset] = useState<any>(null);
+  const [viewingAsset, setViewingAsset] = useState<{
+    _id: string;
+    name: string;
+    description: string;
+    pricePerUnit: number;
+    type?: string;
+    status?: string;
+    currency?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    settings?: {
+      pricePerUnit: number;
+      minUnit?: number;
+      minAmount?: number;
+    };
+  } | null>(null);
 
-  const createAsset = async (data: any) => {
+  const createAsset = async (data: {
+    name: string;
+    description: string;
+    pricePerUnit: number;
+    minUnit?: number;
+    minAmount?: number;
+  }) => {
     if (!token) return;
     try {
       setCreating(true);
@@ -74,8 +110,8 @@ export default function AssetsPage({
         const j = await assetsRes.json();
         setAssets(j?.data || j);
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An error occurred");
     } finally {
       setCreating(false);
     }
@@ -370,8 +406,8 @@ export default function AssetsPage({
                   e.preventDefault();
                   const formData = new FormData(e.target as HTMLFormElement);
                   createAsset({
-                    name: formData.get("name"),
-                    description: formData.get("description"),
+                    name: formData.get("name") as string,
+                    description: formData.get("description") as string,
                     pricePerUnit: parseFloat(
                       formData.get("pricePerUnit") as string
                     ),

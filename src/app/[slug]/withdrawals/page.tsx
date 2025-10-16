@@ -10,9 +10,26 @@ export default function WithdrawalsPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<
+    {
+      _id: string;
+      amount: number;
+      currency: string;
+      status: string;
+      reason: string;
+      withdrawalType?: string;
+      requestedAt?: string;
+      approvedAt?: string;
+      member: {
+        firstname: string;
+        lastname: string;
+        email: string;
+      };
+      createdAt: string;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [page, setPage] = useState(1);
@@ -57,10 +74,11 @@ export default function WithdrawalsPage({
       const data = await response.json();
       setWithdrawals(data.data || []);
       setTotalPages(data.pagination?.pages || 1);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch withdrawals";
       setToast({
-        message: err.message || "Failed to fetch withdrawals",
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -96,10 +114,11 @@ export default function WithdrawalsPage({
         message: "Withdrawal approved successfully!",
         type: "success",
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to approve withdrawal";
       setToast({
-        message: err.message || "Failed to approve withdrawal",
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -142,10 +161,11 @@ export default function WithdrawalsPage({
         message: "Withdrawal rejected successfully!",
         type: "success",
       });
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to reject withdrawal";
       setToast({
-        message: err.message || "Failed to reject withdrawal",
+        message: errorMessage,
         type: "error",
       });
     } finally {

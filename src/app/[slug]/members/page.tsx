@@ -19,17 +19,17 @@ interface Member {
   createdAt: string;
 }
 
-interface MembersResponse {
-  data: Member[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    pages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
+// interface MembersResponse {
+//   data: Member[];
+//   pagination: {
+//     total: number;
+//     page: number;
+//     limit: number;
+//     pages: number;
+//     hasNextPage: boolean;
+//     hasPrevPage: boolean;
+//   };
+// }
 
 export default function MembersPage({
   params,
@@ -38,7 +38,14 @@ export default function MembersPage({
 }) {
   const resolvedParams = use(params);
   const [members, setMembers] = useState<Member[]>([]);
-  const [pagination, setPagination] = useState<any>(null);
+  const [pagination, setPagination] = useState<{
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -92,8 +99,8 @@ export default function MembersPage({
 
       setMembers(Array.isArray(membersData) ? membersData : []);
       setPagination(paginationData);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -127,8 +134,8 @@ export default function MembersPage({
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     }
   };
 

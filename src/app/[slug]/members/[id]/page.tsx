@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 // Types
 interface Member {
@@ -85,8 +85,8 @@ export default function MemberDetailPage({
         const statsData: { data: MemberStats } = await statsRes.json();
         setStats(statsData.data);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }

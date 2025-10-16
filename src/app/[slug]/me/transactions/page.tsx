@@ -10,7 +10,16 @@ export default function MemberTransactionsPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<
+    Array<{
+      _id: string;
+      amount: number;
+      type: string;
+      status: string;
+      description: string;
+      createdAt: string;
+    }>
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -49,8 +58,8 @@ export default function MemberTransactionsPage({
 
       const data = await response.json();
       setTransactions(data.data || data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }

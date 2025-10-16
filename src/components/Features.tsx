@@ -163,8 +163,8 @@ export default function Features() {
                   Real-time Analytics Dashboard
                 </h3>
                 <p className="text-gray-800 mb-6">
-                  Get instant insights into your cooperative's performance with
-                  our comprehensive analytics dashboard.
+                  Get instant insights into your cooperative&apos;s performance
+                  with our comprehensive analytics dashboard.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white/60 rounded-lg p-4">

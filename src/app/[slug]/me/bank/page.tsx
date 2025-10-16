@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation"; // Unused for now
 import MemberSidebar from "@/components/MemberSidebar";
 
 interface Bank {
@@ -36,7 +36,7 @@ export default function BankManagementPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const pathname = usePathname();
+  // const pathname = usePathname(); // Unused for now
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function BankManagementPage({
   // Bank data state
   const [myBank, setMyBank] = useState<Bank | null>(null);
   const [availableBanks, setAvailableBanks] = useState<AvailableBank[]>([]);
-  const [loadingBanks, setLoadingBanks] = useState(false);
+  // const [loadingBanks, setLoadingBanks] = useState(false); // Unused for now
 
   // Modal states
   const [showAddBankModal, setShowAddBankModal] = useState(false);
@@ -88,7 +88,7 @@ export default function BankManagementPage({
         const errorData = await response.json();
         setError(errorData.message || "Failed to fetch bank information");
       }
-    } catch (err: any) {
+    } catch {
       setError("Failed to fetch bank information");
     }
   }, [token]);
@@ -97,7 +97,7 @@ export default function BankManagementPage({
     if (!token) return;
 
     try {
-      setLoadingBanks(true);
+      // setLoadingBanks(true);
       const apiBase = process.env.NEXT_PUBLIC_API_BASE as string;
       const response = await fetch(`${apiBase}/api/v1/member/banks`, {
         headers: {
@@ -112,10 +112,10 @@ export default function BankManagementPage({
         const errorData = await response.json();
         setError(errorData.message || "Failed to fetch available banks");
       }
-    } catch (err: any) {
+    } catch {
       setError("Failed to fetch available banks");
     } finally {
-      setLoadingBanks(false);
+      // setLoadingBanks(false);
     }
   }, [token]);
 
@@ -163,7 +163,7 @@ export default function BankManagementPage({
         );
         return null;
       }
-    } catch (err: any) {
+    } catch {
       showToast("Failed to resolve bank account", "error");
       return null;
     } finally {
@@ -201,7 +201,7 @@ export default function BankManagementPage({
         const errorData = await response.json();
         showToast(errorData.message || "Failed to add bank account", "error");
       }
-    } catch (err: any) {
+    } catch {
       showToast("Failed to add bank account", "error");
     } finally {
       setSubmitting(false);
@@ -241,7 +241,7 @@ export default function BankManagementPage({
           "error"
         );
       }
-    } catch (err: any) {
+    } catch {
       showToast("Failed to update bank account", "error");
     } finally {
       setSubmitting(false);
@@ -270,7 +270,7 @@ export default function BankManagementPage({
           "error"
         );
       }
-    } catch (err: any) {
+    } catch {
       showToast("Failed to delete bank account", "error");
     }
   };

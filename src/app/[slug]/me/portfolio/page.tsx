@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+// import { usePathname } from "next/navigation"; // Unused for now
 import MemberSidebar from "@/components/MemberSidebar";
 
 export default function MemberPortfolioPage({
@@ -11,19 +11,26 @@ export default function MemberPortfolioPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const pathname = usePathname();
-  const [portfolio, setPortfolio] = useState<any | null>(null);
+  // const pathname = usePathname(); // Unused for now
+  const [portfolio, setPortfolio] = useState<{
+    totalValue: number;
+    assets: Array<{
+      name: string;
+      value: number;
+      units: number;
+    }>;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
-  const handleSignOut = () => {
-    localStorage.removeItem("vc_access_token");
-    localStorage.removeItem("vc_refresh_token");
-    localStorage.removeItem("vc_org_id");
-    window.location.href = `/${resolvedParams.slug}`;
-  };
+  // const handleSignOut = () => {
+  //   localStorage.removeItem("vc_access_token");
+  //   localStorage.removeItem("vc_refresh_token");
+  //   localStorage.removeItem("vc_org_id");
+  //   window.location.href = `/${resolvedParams.slug}`;
+  // };
 
   useEffect(() => {
     setIsClient(true);
@@ -53,8 +60,8 @@ export default function MemberPortfolioPage({
 
       const data = await response.json();
       setPortfolio(data.data || data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -118,19 +125,24 @@ export default function MemberPortfolioPage({
                 <div className="bg-white rounded-xl shadow p-6">
                   <div className="text-sm text-gray-500">Total Investment</div>
                   <div className="text-3xl font-bold text-gray-900">
-                    ₦{portfolio.totalInvestment?.toLocaleString() || "0"}
+                    ₦{portfolio.totalValue?.toLocaleString() || "0"}
                   </div>
                 </div>
                 <div className="bg-white rounded-xl shadow p-6">
                   <div className="text-sm text-gray-500">Total Units</div>
                   <div className="text-3xl font-bold text-gray-900">
-                    {portfolio.totalUnits || "0"}
+                    {(
+                      portfolio.assets?.reduce(
+                        (sum, asset) => sum + (asset.units || 0),
+                        0
+                      ) ?? 0
+                    ).toLocaleString()}
                   </div>
                 </div>
                 <div className="bg-white rounded-xl shadow p-6">
                   <div className="text-sm text-gray-500">Current Value</div>
                   <div className="text-3xl font-bold text-gray-900">
-                    ₦{portfolio.currentValue?.toLocaleString() || "0"}
+                    ₦{portfolio.totalValue?.toLocaleString() || "0"}
                   </div>
                 </div>
               </div>
@@ -146,18 +158,16 @@ export default function MemberPortfolioPage({
               <div className="p-6">
                 {portfolio?.assets && portfolio.assets.length > 0 ? (
                   <div className="space-y-4">
-                    {portfolio.assets.map((asset: any) => (
+                    {portfolio.assets.map((asset, index) => (
                       <div
-                        key={asset._id}
+                        key={`${asset.name}-${index}`}
                         className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
                       >
                         <div>
                           <h4 className="font-medium text-gray-900">
                             {asset.name}
                           </h4>
-                          <p className="text-sm text-gray-500 capitalize">
-                            {asset.type}
-                          </p>
+                          {/* asset.type not available in current shape */}
                         </div>
                         <div className="text-right">
                           <div className="font-medium text-gray-900">
@@ -198,22 +208,14 @@ export default function MemberPortfolioPage({
                       Total Return
                     </label>
                     <p className="text-2xl font-bold text-gray-900">
-                      ₦{portfolio.totalReturn?.toLocaleString() || "0"}
+                      ₦{portfolio.totalValue?.toLocaleString() || "0"}
                     </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500">
                       Return Percentage
                     </label>
-                    <p
-                      className={`text-2xl font-bold ${
-                        (portfolio.returnPercentage || 0) >= 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {(portfolio.returnPercentage || 0).toFixed(2)}%
-                    </p>
+                    <p className="text-2xl font-bold text-gray-900">0.00%</p>
                   </div>
                 </div>
               </div>

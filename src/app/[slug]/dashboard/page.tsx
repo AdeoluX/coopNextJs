@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, use } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import AdminSidebar from "@/components/AdminSidebar";
 
@@ -20,7 +20,20 @@ export default function DashboardPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const [summary, setSummary] = useState<any | null>(null);
+  const [summary, setSummary] = useState<{
+    totalMembers: number;
+    totalAssets: number;
+    totalLoans: number;
+    totalTransactions: number;
+    memberCount?: number;
+    members?: { active: number };
+    walletBalance?: number;
+    wallet?: { balance: number };
+    loansOutstanding?: number;
+    loans?: { outstanding: number };
+    assetValue?: number;
+    assets?: { value: number };
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);

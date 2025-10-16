@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import Link from "next/link";
+// import Link from "next/link"; // Unused for now
 import AdminSidebar from "@/components/AdminSidebar";
 
 interface LoanItem {
@@ -91,8 +91,8 @@ export default function LoansPage({
         const j = await loansRes.json();
         setLoans(j?.data || j);
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An error occurred");
     }
   };
 
@@ -123,8 +123,8 @@ export default function LoansPage({
         const j = await loansRes.json();
         setLoans(j?.data || j);
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An error occurred");
     }
   };
 

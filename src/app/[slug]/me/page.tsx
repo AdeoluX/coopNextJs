@@ -3,6 +3,45 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import MemberSidebar from "@/components/MemberSidebar";
+
+// Types
+interface Member {
+  _id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
+  role: string;
+  cooperativeId?: string;
+  status?: string;
+  createdAt?: string;
+}
+
+interface Wallet {
+  _id: string;
+  walletType: string;
+  ledger_balance: number;
+  currency: string;
+}
+
+interface Bank {
+  _id: string;
+  bankCode: string;
+  bankName: string;
+  accountNumber: string;
+  accountName: string;
+}
+
+interface MemberData {
+  member: Member;
+  wallets: Wallet[];
+  wallet?: {
+    balance: number;
+    currency: string;
+    id: string;
+  };
+  bank: Bank | null;
+}
 import Toast from "@/components/Toast";
 
 export default function MemberDashboardPage({
@@ -11,7 +50,7 @@ export default function MemberDashboardPage({
   params: Promise<{ slug: string }>;
 }) {
   const resolvedParams = use(params);
-  const [memberData, setMemberData] = useState<any | null>(null);
+  const [memberData, setMemberData] = useState<MemberData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -27,14 +66,14 @@ export default function MemberDashboardPage({
   const [contributeEmail, setContributeEmail] = useState("");
   const [contributing, setContributing] = useState(false);
 
-  // Asset purchase modal state
-  const [showAssetModal, setShowAssetModal] = useState(false);
-  const [availableAssets, setAvailableAssets] = useState<any[]>([]);
-  const [loadingAssets, setLoadingAssets] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<any>(null);
-  const [assetQuantity, setAssetQuantity] = useState("");
-  const [assetEmail, setAssetEmail] = useState("");
-  const [purchasing, setPurchasing] = useState(false);
+  // Asset purchase modal state (commented out for now)
+  // const [showAssetModal, setShowAssetModal] = useState(false);
+  // const [availableAssets, setAvailableAssets] = useState<any[]>([]);
+  // const [loadingAssets, setLoadingAssets] = useState(false);
+  // const [selectedAsset, setSelectedAsset] = useState<any>(null);
+  // const [assetQuantity, setAssetQuantity] = useState("");
+  // const [assetEmail, setAssetEmail] = useState(""); // Unused for now
+  // const [purchasing, setPurchasing] = useState(false);
 
   // Withdrawal request modal state
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
@@ -75,43 +114,43 @@ export default function MemberDashboardPage({
       // Set email for forms if available
       if (data.data?.member?.email) {
         setContributeEmail(data.data.member.email);
-        setAssetEmail(data.data.member.email);
+        // setAssetEmail(data.data.member.email);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAvailableAssets = async () => {
-    if (!token) return;
+  // const fetchAvailableAssets = async () => {
+  //   if (!token) return;
 
-    try {
-      setLoadingAssets(true);
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE as string;
+  //   try {
+  //     setLoadingAssets(true);
+  //     const apiBase = process.env.NEXT_PUBLIC_API_BASE as string;
 
-      const response = await fetch(
-        `${apiBase}/api/v1/member/assets/available`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //     const response = await fetch(
+  //       `${apiBase}/api/v1/member/assets/available`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch available assets");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch available assets");
+  //     }
 
-      const data = await response.json();
-      setAvailableAssets(data.data || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoadingAssets(false);
-    }
-  };
+  //     const data = await response.json();
+  //     setAvailableAssets(data.data || []);
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoadingAssets(false);
+  //   }
+  // };
 
   const handleContribute = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,10 +193,12 @@ export default function MemberDashboardPage({
         setError("Payment URL not received");
         setToast({ message: "Payment URL not received", type: "error" });
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to initiate contribution";
+      setError(errorMessage);
       setToast({
-        message: err.message || "Failed to initiate contribution",
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -165,53 +206,53 @@ export default function MemberDashboardPage({
     }
   };
 
-  const handleAssetPurchase = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token || !selectedAsset || !assetQuantity) return;
+  // const handleAssetPurchase = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!token || !selectedAsset || !assetQuantity) return;
 
-    try {
-      setPurchasing(true);
-      const apiBase = process.env.NEXT_PUBLIC_API_BASE as string;
+  //   try {
+  //     setPurchasing(true);
+  //     const apiBase = process.env.NEXT_PUBLIC_API_BASE as string;
 
-      const totalAmount =
-        parseFloat(assetQuantity) * (selectedAsset.settings?.pricePerUnit || 0);
+  //     const totalAmount =
+  //       parseFloat(assetQuantity) * (selectedAsset.settings?.pricePerUnit || 0);
 
-      const response = await fetch(`${apiBase}/api/v1/member/assets/buy`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          assetId: selectedAsset._id,
-          quantity: parseFloat(assetQuantity),
-          amount: totalAmount,
-          currency: "NGN",
-          email: assetEmail,
-        }),
-      });
+  //     const response = await fetch(`${apiBase}/api/v1/member/assets/buy`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: JSON.stringify({
+  //         assetId: selectedAsset._id,
+  //         quantity: parseFloat(assetQuantity),
+  //         amount: totalAmount,
+  //         currency: "NGN",
+  //         email: assetEmail,
+  //       }),
+  //     });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Failed to initiate asset purchase"
-        );
-      }
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(
+  //         errorData.message || "Failed to initiate asset purchase"
+  //       );
+  //     }
 
-      const data = await response.json();
+  //     const data = await response.json();
 
-      // Redirect to payment URL if provided
-      if (data.data?.authorization_url) {
-        window.location.href = data.data.authorization_url;
-      } else {
-        setError("Payment URL not received");
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setPurchasing(false);
-    }
-  };
+  //     // Redirect to payment URL if provided
+  //     if (data.data?.authorization_url) {
+  //       window.location.href = data.data.authorization_url;
+  //     } else {
+  //       setError("Payment URL not received");
+  //     }
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   } finally {
+  //     setPurchasing(false);
+  //   }
+  // };
 
   const handleWithdrawalRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,7 +283,7 @@ export default function MemberDashboardPage({
         );
       }
 
-      const data = await response.json();
+      // const data = await response.json();
 
       setShowWithdrawalModal(false);
       setWithdrawalAmount("");
@@ -253,10 +294,14 @@ export default function MemberDashboardPage({
       });
 
       fetchMemberData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to submit withdrawal request";
+      setError(errorMessage);
       setToast({
-        message: err.message || "Failed to submit withdrawal request",
+        message: errorMessage,
         type: "error",
       });
     } finally {
@@ -393,7 +438,9 @@ export default function MemberDashboardPage({
                   Member Since
                 </label>
                 <p className="text-gray-900">
-                  {new Date(memberData.member.createdAt).toLocaleDateString()}
+                  {memberData.member.createdAt
+                    ? new Date(memberData.member.createdAt).toLocaleDateString()
+                    : "Not available"}
                 </p>
               </div>
               <div>
