@@ -31,8 +31,17 @@ export default function LoginForm({ orgId, slug }: Props) {
       const data = raw?.data ?? raw;
       const accessToken = data?.token?.access_token || data?.access_token;
       const refreshToken = data?.token?.refresh_token || data?.refresh_token;
-      const redirectToMemberDashboard =
+
+      // Check redirectToMemberDashboard - if false or undefined, go to admin dashboard
+      const shouldGoToMemberDashboard =
         data?.redirectToMemberDashboard === true;
+
+      console.log("Login response data:", data);
+      console.log(
+        "redirectToMemberDashboard value:",
+        data?.redirectToMemberDashboard
+      );
+      console.log("shouldGoToMemberDashboard:", shouldGoToMemberDashboard);
 
       if (accessToken) {
         localStorage.setItem("vc_access_token", accessToken);
@@ -45,9 +54,10 @@ export default function LoginForm({ orgId, slug }: Props) {
         // Backend sets redirectToMemberDashboard based on user role
         // If false, user is admin and should see admin dashboard
         // If true, user is regular member and should see member dashboard
-        const target = redirectToMemberDashboard
+        const target = shouldGoToMemberDashboard
           ? `/${slug}/me`
           : `/${slug}/dashboard`;
+        console.log("Navigating to:", target);
         try {
           router.push(target);
         } catch {
