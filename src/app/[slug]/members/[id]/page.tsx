@@ -16,6 +16,9 @@ interface Member {
   isActive: boolean;
   createdAt: string;
   dob?: string;
+  coopSettings?: {
+    contributionAmount?: number;
+  };
 }
 
 interface MemberStats {
@@ -41,6 +44,10 @@ export default function MemberDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [showContributionModal, setShowContributionModal] = useState(false);
+  const [contributionAmount, setContributionAmount] = useState<string>("");
+  const [updatingContribution, setUpdatingContribution] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -90,6 +97,54 @@ export default function MemberDetailPage({
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateContribution = async () => {
+    if (!token || !contributionAmount) return;
+
+    try {
+      setUpdatingContribution(true);
+      setError(null);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/v1/admin/members/${resolvedParams.id}/contribution`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            contributionAmount: parseFloat(contributionAmount),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update contribution");
+      }
+
+      const data = await response.json();
+      setMember(data.data);
+      setShowContributionModal(false);
+      setContributionAmount("");
+      setSuccessMessage("Monthly contribution amount updated successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update contribution"
+      );
+    } finally {
+      setUpdatingContribution(false);
+    }
+  };
+
+  const openContributionModal = () => {
+    setContributionAmount(
+      member?.coopSettings?.contributionAmount?.toString() || ""
+    );
+    setShowContributionModal(true);
   };
 
   if (!isClient) {
@@ -341,6 +396,13 @@ export default function MemberDetailPage({
 
       {/* Main Content */}
       <div className="ml-64 p-8">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            {successMessage}
+          </div>
+        )}
+
         <div className="mb-8">
           <Link
             href={`/${resolvedParams.slug}/members`}
@@ -445,6 +507,36 @@ export default function MemberDetailPage({
                 </div>
               </div>
             </div>
+
+            {/* Contribution Settings Card */}
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Contribution Settings
+              </h2>
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="block text-sm font-medium text-gray-500">
+                    Monthly Contribution Amount
+                  </label>
+                  <p className="mt-1 text-2xl font-bold text-gray-900">
+                    {member.coopSettings?.contributionAmount
+                      ? `₦${member.coopSettings.contributionAmount.toLocaleString()}`
+                      : "Not set"}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    This is the expected monthly contribution for this member
+                  </p>
+                </div>
+                <button
+                  onClick={openContributionModal}
+                  className="px-4 py-2 bg-[--color-lemon-600] text-gray-900 rounded-lg hover:bg-[--color-lemon-700] transition-colors font-medium"
+                >
+                  {member.coopSettings?.contributionAmount
+                    ? "Update"
+                    : "Set Amount"}
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Member Stats */}
@@ -536,6 +628,82 @@ export default function MemberDetailPage({
           </button>
         </div>
       </div>
+
+      {/* Contribution Amount Modal */}
+      {showContributionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold text-gray-900">
+                Set Monthly Contribution
+              </h3>
+              <button
+                onClick={() => setShowContributionModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 mb-4">
+              Set the expected monthly contribution amount for{" "}
+              <strong>
+                {member.firstname} {member.lastname}
+              </strong>
+              . This will be used for tracking and reminders.
+            </p>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Contribution Amount (₦)
+              </label>
+              <input
+                type="number"
+                value={contributionAmount}
+                onChange={(e) => setContributionAmount(e.target.value)}
+                placeholder="Enter amount"
+                min="0"
+                step="100"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[--color-lemon-500] focus:border-transparent text-gray-900"
+              />
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowContributionModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateContribution}
+                disabled={updatingContribution || !contributionAmount}
+                className="flex-1 px-4 py-3 bg-[--color-lemon-600] text-gray-900 rounded-lg hover:bg-[--color-lemon-700] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updatingContribution ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
