@@ -31,7 +31,6 @@ export default function LoginForm({ orgId, slug }: Props) {
       const data = raw?.data ?? raw;
       const accessToken = data?.token?.access_token || data?.access_token;
       const refreshToken = data?.token?.refresh_token || data?.refresh_token;
-      const cooperativeFlag = data?.cooperative === true;
       const redirectToMemberDashboard =
         data?.redirectToMemberDashboard === true;
 
@@ -43,11 +42,12 @@ export default function LoginForm({ orgId, slug }: Props) {
       }
       localStorage.setItem("vc_org_id", orgId);
       if (slug) {
-        // Redirect to member dashboard if cooperative is null/false or if explicitly flagged
-        const target =
-          cooperativeFlag && !redirectToMemberDashboard
-            ? `/${slug}/dashboard`
-            : `/${slug}/me`;
+        // Backend sets redirectToMemberDashboard based on user role
+        // If false, user is admin and should see admin dashboard
+        // If true, user is regular member and should see member dashboard
+        const target = redirectToMemberDashboard
+          ? `/${slug}/me`
+          : `/${slug}/dashboard`;
         try {
           router.push(target);
         } catch {
